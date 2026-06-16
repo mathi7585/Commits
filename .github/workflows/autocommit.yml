@@ -1,1 +1,33 @@
+name: Daily Dummy Commit
 
+on:
+  schedule:
+    - cron: '30 1 * * *'  # Runs at 1:30 AM UTC = 7:00 AM IST
+  workflow_dispatch:       # Allows manual trigger from Actions tab
+
+jobs:
+  dummy-commit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Update README with timestamp
+        run: |
+          TIMESTAMP=$(TZ='Asia/Kolkata' date '+%Y-%m-%d %H:%M:%S IST')
+          echo "" >> README.md
+          echo "<!-- Auto-updated: $TIMESTAMP -->" >> README.md
+
+      - name: Commit and push
+        run: |
+          git add README.md
+          git commit -m "chore: daily auto-update [$(TZ='Asia/Kolkata' date '+%Y-%m-%d')]"
+          git push origin main
